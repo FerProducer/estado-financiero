@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZOMOZ | Estados Financieros</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{margin:0;background:#f5f5f5;color:#333}
+header{background:#fff;padding:20px;border-bottom:1px solid #ddd;text-align:center}
+.container{max-width:1100px;margin:30px auto;padding:20px}
+.card{background:#fff;border-radius:6px;padding:20px;margin-bottom:30px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+h2{margin-top:0;font-size:18px;border-bottom:1px solid #eee;padding-bottom:10px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:10px;border-bottom:1px solid #eee}
+th{background:#fafafa}
+input,select{width:100%;padding:8px;border:1px solid #ccc;border-radius:4px}
+input[readonly]{background:#eee}
+.total{font-weight:bold;background:#f9f9f9}
+.btn{background:#222;color:#fff;border:none;padding:12px 20px;border-radius:4px;cursor:pointer}
+.btn:hover{opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>ZOMOZ Producciones | Estados Financieros</h1>
+</header>
+
+<div class="container">
+
+<!-- PERIODO -->
+<div class="card">
+<h2>Periodo</h2>
+<div class="grid">
+<select id="mes">
+<option value="">Mes</option>
+<option>Enero</option><option>Febrero</option><option>Marzo</option>
+<option>Abril</option><option>Mayo</option><option>Junio</option>
+<option>Julio</option><option>Agosto</option><option>Septiembre</option>
+<option>Octubre</option><option>Noviembre</option><option>Diciembre</option>
+</select>
+
+<select id="anio">
+<option value="">Año</option>
+<script>
+for(let y=2023;y<=2035;y++)document.write(`<option>${y}</option>`)
+</script>
+</select>
+</div>
+</div>
+
+<!-- ESTADO DE RESULTADOS -->
+<div class="card">
+<h2>Estado de Resultados</h2>
+<table>
+<tr><th>Concepto</th><th>Monto</th></tr>
+<tr><td>Ventas</td><td><input type="number" min="0" id="ventas"></td></tr>
+<tr><td>Servicios</td><td><input type="number" min="0" id="servicios"></td></tr>
+<tr class="total"><td>Total Ingresos</td><td><input readonly id="totalIngresos"></td></tr>
+<tr><td>Costos</td><td><input type="number" min="0" id="costos"></td></tr>
+<tr><td>Gastos</td><td><input type="number" min="0" id="gastos"></td></tr>
+<tr class="total"><td>Utilidad Neta</td><td><input readonly id="utilidad"></td></tr>
+</table>
+</div>
+
+<!-- BALANCE -->
+<div class="card">
+<h2>Balance General</h2>
+<table>
+<tr><th>Concepto</th><th>Monto</th></tr>
+<tr><td>Efectivo</td><td><input type="number" min="0" id="efectivo"></td></tr>
+<tr><td>Bancos</td><td><input type="number" min="0" id="bancos"></td></tr>
+<tr class="total"><td>Total Activos</td><td><input readonly id="activos"></td></tr>
+<tr><td>Deudas</td><td><input type="number" min="0" id="deudas"></td></tr>
+<tr class="total"><td>Capital</td><td><input readonly id="capital"></td></tr>
+</table>
+</div>
+
+<!-- DASHBOARD -->
+<div class="card">
+<h2>Dashboard Financiero</h2>
+<canvas id="grafica"></canvas>
+</div>
+
+<button class="btn" onclick="guardar()">Guardar y Enviar</button>
+
+</div>
+
+<script>
+const ids = ['ventas','servicios','costos','gastos','efectivo','bancos','deudas'];
+
+ids.forEach(id=>document.getElementById(id).addEventListener('input',calcular));
+
+function v(id){return Number(document.getElementById(id).value)||0}
+
+function calcular(){
+let ingresos=v('ventas')+v('servicios');
+document.getElementById('totalIngresos').value=ingresos;
+
+let utilidad=ingresos-v('costos')-v('gastos');
+document.getElementById('utilidad').value=utilidad;
+
+let activos=v('efectivo')+v('bancos');
+document.getElementById('activos').value=activos;
+
+document.getElementById('capital').value=activos-v('deudas');
+
+actualizarGrafica(ingresos,v('costos'),v('gastos'),utilidad);
+}
+
+let chart=new Chart(document.getElementById('grafica'),{
+type:'bar',
+data:{labels:['Ingresos','Costos','Gastos','Utilidad'],
+datasets:[{data:[0,0,0,0]}]}
+});
+
+function actualizarGrafica(i,c,g,u){
+chart.data.datasets[0].data=[i,c,g,u];
+chart.update();
+}
+
+function guardar(){
+if(!mes.value||!anio.value){alert('Selecciona periodo');return;}
+
+fetch('URL_DE_TU_APPS_SCRIPT',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+mes:mes.value,
+anio:anio.value,
+ventas:v('ventas'),
+servicios:v('servicios'),
+costos:v('costos'),
+gastos:v('gastos'),
+utilidad:v('utilidad'),
+activos:v('activos'),
+capital:v('capital')
+})
+}).then(()=>alert('Registro enviado correctamente'));
+}
+</script>
+
+</body>
+</html>
