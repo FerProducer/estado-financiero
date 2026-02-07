@@ -128,7 +128,7 @@ chart.update();
 function guardar(){
 if(!mes.value||!anio.value){alert('Selecciona periodo');return;}
 
-fetch('URL_DE_TU_APPS_SCRIPT',{
+fetch('https://script.google.com/macros/s/AKfycbxooAuJlPelUXVLnzU61rU5oEMKKOvOnzSdxFLM79BtaXU0pcLG9X2okFDZpAsKfMoQxQ/exec',{
 method:'POST',
 headers:{'Content-Type':'application/json'},
 body:JSON.stringify({
